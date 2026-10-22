@@ -3,6 +3,10 @@ const CACHE_NAME = 'dastchin-5b8551851d0f';
 const CACHE_PREFIX = 'dastchin-';
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./pwa.js", "./manifest.webmanifest", "./assets/fonts/InstrumentSerif.woff2", "./assets/fonts/Vazirmatn-var.woff2", "./assets/img/d1.jpg", "./assets/img/d2.jpg", "./assets/img/e1.jpg", "./assets/img/e2.jpg", "./assets/img/e3.jpg", "./assets/img/e4.jpg", "./assets/img/e5.jpg", "./assets/img/e6.jpg", "./assets/img/e7.jpg", "./assets/img/e8.jpg", "./assets/img/e9.jpg", "./assets/img/p01.jpg", "./assets/img/p02.jpg", "./assets/img/p03.jpg", "./assets/img/p04.jpg", "./assets/img/p05.jpg", "./assets/img/p06.jpg", "./assets/img/p07.jpg", "./assets/img/p08.jpg", "./assets/img/p09.jpg", "./assets/img/p10.jpg", "./assets/img/p11.jpg", "./assets/img/p12.jpg", "./assets/img/p13.jpg", "./assets/img/p14.jpg", "./assets/img/p15.jpg", "./assets/img/p16.jpg", "./assets/img/p17.jpg", "./assets/img/p18.jpg", "./icons/apple-touch-icon.png", "./icons/favicon.svg", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png"];
 
+// Prices, availability, checkout and account data must never be served stale.
+// The demo has no backend today; this keeps that true if one is added.
+const BYPASS_PATHS = ['/api/', '/checkout', '/account', '/orders', '/cart'];
+
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
 });
@@ -24,6 +28,7 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || !url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
+  if (BYPASS_PATHS.some(segment => url.pathname.includes(segment)) || request.headers.has('authorization')) return;
 
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
